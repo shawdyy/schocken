@@ -95,17 +95,20 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                     if(G.lastPhase === "play_penaltiesLeft"){
                         const maxPenaltiesThisRound = (G.penaltiesLeft - G.roundHistory[0].penalties > 0) ? G.roundHistory[0].penalties : G.penaltiesLeft;
 
+                        // Kein schock aus
                         if(G.roundHistory[0].penalties !== Infinity &&
                             G.players[Number(G.roundHistory[0].loserIndex)].currentScore.penalties + maxPenaltiesThisRound < G.ruleSet.totalPenaltiesPerRound
                         ){
                             G.players[Number(G.roundHistory[0].loserIndex)].currentScore.penalties += maxPenaltiesThisRound;
                             G.penaltiesLeft -= maxPenaltiesThisRound;
                         }
+                        // Schock aus
                         else{
                             // FIXME:
                             // penalties wird nicht anständig resetted
                             G.players = helper.resetPlayerState(G, {penalties: 0, currentThrow: [], hiddenDice: [], usedThrows:0});
                             G.players[Number(G.roundHistory[0].loserIndex)].finalPenalty +=1;
+                            G.penaltiesLeft = G.ruleSet.totalPenaltiesPerRound;
                         }
                     }
                     // Zu händelnde Situationen:
@@ -114,17 +117,21 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                         // alle Steine vergeben, alle Steine liegen bei einer Person
                     else if(G.lastPhase === "play_onlyWithPenalties"){
                         const maxPenaltiesThisRound = (G.players[Number(G.roundHistory[0].winnerIndex)].currentScore.penalties - G.roundHistory[0].penalties > 0) ? G.roundHistory[0].penalties : G.players[Number(G.roundHistory[0].winnerIndex)].currentScore.penalties;
+
+                        // Kein Schock aus
                         if(G.roundHistory[0].penalties !== Infinity &&
                         G.players[Number(G.roundHistory[0].loserIndex)].currentScore.penalties + maxPenaltiesThisRound < G.ruleSet.totalPenaltiesPerRound
                         ){
                             G.players[Number(G.roundHistory[0].loserIndex)].currentScore.penalties += maxPenaltiesThisRound;
                             G.players[Number(G.roundHistory[0].winnerIndex)].currentScore.penalties -= maxPenaltiesThisRound;
                         }
+                        // Schock aus
                         else{
                             // FIXME:
                             // penalties wird nicht anständig resetted
-                            G.players = helper.resetPlayerState(G, {penalties: 0, currentThrow: [], hiddenDice: [], usedThrows:0});
+                            G.players = helper.resetPlayerState(G, {penalties: 0});
                             G.players[Number(G.roundHistory[0].loserIndex)].finalPenalty +=1;
+                            G.penaltiesLeft = G.ruleSet.totalPenaltiesPerRound;
                         }
                     }
                     G.diceToRoll = 3;
