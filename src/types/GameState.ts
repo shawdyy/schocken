@@ -17,6 +17,8 @@ export default interface Game {
     rollsThisTurn:number,
     // penalties left before the turn evalutation
     penaltiesLeft:number,
+    // finalpenalties left 
+    finalPenaltiesLeft:number,
     // results auf the last rounds played
     roundHistory: TurnWinner[],
     // is the round end confirmed

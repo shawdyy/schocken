@@ -7,7 +7,8 @@ interface Random {
 }
 
 interface Events {
-    endTurn: () => void;
+	endTurn: () => void;
+	endgame: () => void;
 }
 export default interface GameContext {
 	numPlayers: number;

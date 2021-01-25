@@ -1,6 +1,6 @@
-import { defaultRuleSet } from "../types/Ruleset";
-import GameState from "../types/GameState";
-import helper from "./helper";
+import { defaultRuleSet } from "../../types/Ruleset";
+import GameState from "../../types/GameState";
+import helper from "../../Utils/helper";
 import { mockGame } from "./moves.test";
 
 describe("helper > whichDiceCanBeHeld", () => {

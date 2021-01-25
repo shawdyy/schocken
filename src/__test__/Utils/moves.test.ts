@@ -1,9 +1,9 @@
-import moves from "./moves";
-import GameState from "../types/GameState";
-import { Player, PlayerState} from "../types/Player";
-import { defaultRuleSet } from "../types/Ruleset";
-import helper from "./helper";
-import { TurnWinner } from "../types/TurnWinner";
+import moves from "../../Utils/moves";
+import GameState from "../../types/GameState";
+import { Player, PlayerState} from "../../types/Player";
+import { defaultRuleSet } from "../../types/Ruleset";
+import helper from "../../Utils/helper";
+import { TurnWinner } from "../../types/TurnWinner";
 
 const mockPlayer = (currentScore:Partial<PlayerState>, index:number):Player =>{
     const player = helper.createPlayer(index.toString(), "test" + index);
@@ -11,10 +11,11 @@ const mockPlayer = (currentScore:Partial<PlayerState>, index:number):Player =>{
     return player;
 }
 
-export const mockGame = (diceToRoll:number=1, totalRolls:number=3, rollsThisTurn=3, diceHold:number[]=[1,1], dice:number[]=[2], ruleSet:object={}, currentPlayerScore:Partial<PlayerState>[]=[{},{},{}], roundHistory:TurnWinner[]=[]) =>{
+export const mockGame = (diceToRoll:number=1, totalRolls:number=3, rollsThisTurn=3, diceHold:number[]=[1,1], dice:number[]=[2], ruleSet:object={}, currentPlayerScore:Partial<PlayerState>[]=[{},{},{}], roundHistory:TurnWinner[]=[]):GameState =>{
     return {
         players: Array(3).fill({}).map((el,i) => mockPlayer(currentPlayerScore[i], i)),
         penaltiesLeft: 13,
+        finalPenaltiesLeft: 2,
         diceToRoll: diceToRoll,
         totalRolls: totalRolls,
         rollsThisTurn: rollsThisTurn,

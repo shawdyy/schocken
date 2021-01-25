@@ -20,6 +20,7 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
             const confirmedRoundEnd:boolean = false;
             const ruleSet:RuleSet = {...defaultRuleSet, ..._ruleSet};
             const penaltiesLeft = ruleSet.totalPenaltiesPerRound
+            const finalPenaltiesLeft = 2;
             const lastPhase = "play_penaltiesLeft";
 
             for(let i:number = 0; i < numberOfPlayers; i++){
@@ -33,6 +34,7 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                 totalRolls,
                 rollsThisTurn,
                 penaltiesLeft,
+                finalPenaltiesLeft,
                 roundHistory,
                 confirmedRoundEnd,
                 ruleSet,
@@ -65,13 +67,27 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                             return (ctx.playOrderPos + 1) % ctx.numPlayers;
                         },
                         playOrder: (G, ctx) => {
+                            // play Order must only be changed if there was min one round played
                             if(G.roundHistory.length > 0){
-                                const loserIndex = ctx.playOrder.indexOf(G.roundHistory[0].loserIndex);
-                                if(G.lastPhase === "play_penaltiesLeft"){
+                                const loserIndex:number = ctx.playOrder.indexOf(G.roundHistory[0].loserIndex);
+                                const newPlayOrder:string[] = [];
+                                // The final
+                                if(G.finalPenaltiesLeft === 0){
+                                    for(let i:number = loserIndex, firstRound:boolean = true; i !== loserIndex || firstRound; i = (i+1) % G.players.length){
+                                        if(firstRound){
+                                            firstRound = false;
+                                        }
+                                        if(G.players[i].finalpenalties > 0){
+                                            newPlayOrder.push(i.toString());
+                                        }
+                                    }
+                                    return newPlayOrder;
+                                }
+                                // everthing else
+                                else if(G.lastPhase === "play_penaltiesLeft"){
                                     return [...ctx.playOrder.slice(loserIndex, ctx.playOrder.length), ...ctx.playOrder.slice(0, loserIndex)];
                                 }
                                 else if(G.lastPhase === "play_onlyWithPenalties"){
-                                    const newPlayOrder:string[] = []
                                     for(let i:number = Number(loserIndex), firstRound:boolean = true; i !== loserIndex || firstRound; i = (i+1) % G.players.length){
                                         if(firstRound){
                                             firstRound = false;
@@ -108,6 +124,7 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                             // penalties wird nicht anständig resetted
                             G.players = helper.resetPlayerState(G, {penalties: 0, currentThrow: [], hiddenDice: [], usedThrows:0});
                             G.players[Number(G.roundHistory[0].loserIndex)].finalPenalty +=1;
+                            G.finalPenaltiesLeft -= 1;
                             G.penaltiesLeft = G.ruleSet.totalPenaltiesPerRound;
                         }
                     }
@@ -131,6 +148,7 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                             // penalties wird nicht anständig resetted
                             G.players = helper.resetPlayerState(G, {penalties: 0});
                             G.players[Number(G.roundHistory[0].loserIndex)].finalPenalty +=1;
+                            G.finalPenaltiesLeft -= 1;
                             G.penaltiesLeft = G.ruleSet.totalPenaltiesPerRound;
                         }
                     }
@@ -205,22 +223,34 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                         playOrder: (G, ctx) => {
                             const loserIndex = Number(G.roundHistory[0].loserIndex);
                             const newPlayOrder = [];
-                            for(let i:number = loserIndex, firstRound:boolean = true; i !== loserIndex || firstRound; i = (i+1) % G.players.length){
-                                if(firstRound){
-                                    firstRound = false;
+                            // the final
+                            if(G.finalPenaltiesLeft === 0){
+                                for(let i:number = loserIndex, firstRound:boolean = true; i !== loserIndex || firstRound; i = (i+1) % G.players.length){
+                                    if(firstRound){
+                                        firstRound = false;
+                                    }
+                                    if(G.players[i].finalpenalties > 0){
+                                        newPlayOrder.push(i.toString());
+                                    }
                                 }
-                                if(G.players[i].currentScore.penalties > 0){
-                                    newPlayOrder.push(i.toString());
-                                }
+                                return newPlayOrder;
                             }
-                            return newPlayOrder;
+                            // everything else
+                            else{
+                                for(let i:number = loserIndex, firstRound:boolean = true; i !== loserIndex || firstRound; i = (i+1) % G.players.length){
+                                    if(firstRound){
+                                        firstRound = false;
+                                    }
+                                    if(G.players[i].currentScore.penalties > 0){
+                                        newPlayOrder.push(i.toString());
+                                    }
+                                }
+                                return newPlayOrder;
+                            }
                         },
                     }
                 }
-            },
-            play_final: {
-
-            },
+            }
         },
         endIf: (G:GameState, ctx:Ctx) => {
             if(helper.hasOnePlayerAllFinalPenalties(G,G.players)){
