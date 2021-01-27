@@ -4,7 +4,6 @@ import GameState from "../types/GameState";
 import { PlayerID } from "boardgame.io"
 import { TurnWinner } from "../types/TurnWinner";
 
-
 const whichDiceCanBeHeld = (dice:number[], ruleSet:RuleSet):boolean[] =>{
     let callback;
     // Option1: Only ones can be held
