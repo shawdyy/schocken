@@ -36,10 +36,9 @@ const createPlayer = (playerID:PlayerID, name: string):Player =>{
         finalPenalty: 0
     }
 }
-const isTransformationPossible = (dice:number[], ruleset:RuleSet):boolean => {
-    if(ruleset.twoSixToOne) return (dice.filter((i:number) => i===6)).length >= 2;
-    else return false;
-        
+const isTransformationPossible = (dice:number[], ruleset:RuleSet):number => {
+    if(ruleset.twoSixToOne) return (dice.filter((i:number) => i === 6)).length-1;
+    else return 0;
 }
 const resetPlayerState = (G:GameState, obj:Partial<PlayerState>) => {
     return G.players.map((el:Player, i:number) => {

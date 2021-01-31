@@ -62,7 +62,7 @@ const SchockenBoard = (bgioProps:any) => {
                         <Button 
                             innerText={"Würfel umwandeln"}
                             onClick={transformDiceOnClickHandler}
-                            disabled={!helper.isTransformationPossible(bgioProps.G.dice, bgioProps.G.ruleSet)}
+                            disabled={helper.isTransformationPossible(bgioProps.G.dice, bgioProps.G.ruleSet) < 1}
                         />
                     </div>
                     <div className="row">
