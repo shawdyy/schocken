@@ -1,6 +1,6 @@
-import { defaultRuleSet } from "../../types/Ruleset";
-import GameState from "../../types/GameState";
-import helper from "../../Utils/helper";
+import { defaultRuleSet } from "../types/Ruleset";
+import GameState from "../types/GameState";
+import helper from "./helper";
 import { mockGame } from "./moves.test";
 
 describe("helper > whichDiceCanBeHeld", () => {
@@ -55,25 +55,31 @@ describe("helper > isTransformationPossible", () => {
     test("Dice: [6,6,2], ruleSet:defaultRuleSet", () => {
         expect(helper.isTransformationPossible([6,6,2],{
             ...defaultRuleSet,
-        })).toBe(true);
+        })).toBe(1);
     });
     test("Dice: [6,6,2], ruleSet:twoSixToOne:true", () => {
         expect(helper.isTransformationPossible([6,6,2],{
             ...defaultRuleSet,
             twoSixToOne: true
-        })).toBe(true);
+        })).toBe(1);
+    });
+    test("Dice: [6,6,2], ruleSet:twoSixToOne:true", () => {
+        expect(helper.isTransformationPossible([6,6,6],{
+            ...defaultRuleSet,
+            twoSixToOne: true
+        })).toBe(2);
     });
     test("Dice: [6,6,2], ruleSet:twoSixToOne:false", () => {
         expect(helper.isTransformationPossible([6,6,2],{
             ...defaultRuleSet,
             twoSixToOne: false
-        })).toBe(false);
+        })).toBe(0);
     });
     test("Dice: [1,6,2], ruleSet:defaultRuleSet", () => {
-        expect(helper.isTransformationPossible([1,6,2],defaultRuleSet)).toBe(false);
+        expect(helper.isTransformationPossible([1,6,2],defaultRuleSet)).toBe(0);
     });
     test("Dice: [4,4,2], ruleSet:defaultRuleSet", () => {
-        expect(helper.isTransformationPossible([4,4,2],defaultRuleSet)).toBe(false);
+        expect(helper.isTransformationPossible([4,4,2],defaultRuleSet)).toBe(-1);
     });
 });
 

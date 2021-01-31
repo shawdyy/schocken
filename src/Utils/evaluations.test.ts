@@ -1,6 +1,6 @@
-import evaluations from "../../Utils/evaluations";
-import { Player } from "../../types/Player";
-import { defaultRuleSet } from "../../types/Ruleset";
+import evaluations from "./evaluations";
+import { Player } from "../types/Player";
+import { defaultRuleSet } from "../types/Ruleset";
 
 const mockPlayer = (dice:number[], id:number):Player => {
     const player:Player = {

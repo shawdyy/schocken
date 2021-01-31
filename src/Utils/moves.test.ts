@@ -1,9 +1,9 @@
-import moves from "../../Utils/moves";
-import GameState from "../../types/GameState";
-import { Player, PlayerState} from "../../types/Player";
-import { defaultRuleSet } from "../../types/Ruleset";
-import helper from "../../Utils/helper";
-import { TurnWinner } from "../../types/TurnWinner";
+import moves from "./moves";
+import GameState from "../types/GameState";
+import { Player, PlayerState} from "../types/Player";
+import { defaultRuleSet } from "../types/Ruleset";
+import helper from "../Utils/helper";
+import { TurnWinner } from "../types/TurnWinner";
 
 const mockPlayer = (currentScore:Partial<PlayerState>, index:number):Player =>{
     const player = helper.createPlayer(index.toString(), "test" + index);
