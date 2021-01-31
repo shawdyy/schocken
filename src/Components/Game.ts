@@ -43,6 +43,7 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
         },
         moves: {
             rollDice: moves.rollDice,
+            rollDiceDebug: moves.rollDiceDebug,
             holdDice: moves.holdDice,
             transformDice: moves.transformDice,
             endTurn: moves.endTurn,
@@ -69,15 +70,25 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                         playOrder: (G, ctx) => {
                             // play Order must only be changed if there was min one round played
                             if(G.roundHistory.length > 0){
-                                const loserIndex:number = ctx.playOrder.indexOf(G.roundHistory[0].loserIndex);
+                                let loserIndex:number = ctx.playOrder.indexOf(G.roundHistory[0].loserIndex);
                                 const newPlayOrder:string[] = [];
                                 // The final
                                 if(G.finalPenaltiesLeft === 0){
+                                    if(G.lastPhase !== "play_penaltiesLeft"){
+                                        // The first round gets started by the player who got the first finalPenalty and not the loser of the last round
+                                        // After that the loser of the last round starts as normal
+                                        for(let i = 0; i < G.players.length; i++){
+                                            if(G.players[i].finalPenalty > 0 && i !== loserIndex){
+                                                loserIndex =  ctx.playOrder.indexOf(i.toString());
+                                                break;
+                                            }
+                                        }
+                                    }
                                     for(let i:number = loserIndex, firstRound:boolean = true; i !== loserIndex || firstRound; i = (i+1) % G.players.length){
                                         if(firstRound){
                                             firstRound = false;
                                         }
-                                        if(G.players[i].finalpenalties > 0){
+                                        if(G.players[i].finalPenalty > 0){
                                             newPlayOrder.push(i.toString());
                                         }
                                     }
@@ -97,6 +108,7 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                                     return newPlayOrder;
                                 }
                             }
+                            // default case: first round in Game
                             return ctx.playOrder;
                         }
                     }
@@ -120,8 +132,6 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                         }
                         // Schock aus
                         else{
-                            // FIXME:
-                            // penalties wird nicht anständig resetted
                             G.players = helper.resetPlayerState(G, {penalties: 0, currentThrow: [], hiddenDice: [], usedThrows:0});
                             G.players[Number(G.roundHistory[0].loserIndex)].finalPenalty +=1;
                             G.finalPenaltiesLeft -= 1;
@@ -144,8 +154,6 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                         }
                         // Schock aus
                         else{
-                            // FIXME:
-                            // penalties wird nicht anständig resetted
                             G.players = helper.resetPlayerState(G, {penalties: 0});
                             G.players[Number(G.roundHistory[0].loserIndex)].finalPenalty +=1;
                             G.finalPenaltiesLeft -= 1;
@@ -229,7 +237,7 @@ const createGame = (numberOfPlayers: number, _ruleSet: any):Game =>{
                                     if(firstRound){
                                         firstRound = false;
                                     }
-                                    if(G.players[i].finalpenalties > 0){
+                                    if(G.players[i].finalPenalty > 0){
                                         newPlayOrder.push(i.toString());
                                     }
                                 }
