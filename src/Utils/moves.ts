@@ -1,5 +1,6 @@
 import Game from "../types/GameState";
 import { Player } from "../types/Player";
+import { TurnWinner } from "../types/TurnWinner";
 import evaluation from "./evaluations";
 import helper from "./helper";
 
@@ -35,7 +36,8 @@ const endTurn = (G:Game, ctx:any) => {
     }     
     G.totalRolls = 0;
     if(ctx.currentPlayer === ctx.playOrder[ctx.playOrder.length-1]){
-        G.roundHistory.unshift(evaluation.evaluateTurnWinner(G.players.filter((player:Player,index:number) => ctx.playOrder.indexOf(index.toString()) > -1), G.ruleSet));
+        const turnWinnerObject:TurnWinner = evaluation.evaluateTurnWinner(G.players.filter((player:Player,index:number) => ctx.playOrder.indexOf(index.toString()) > -1), G.ruleSet);
+        G.roundHistory.unshift(turnWinnerObject);
         for(let i:number = 0; i < G.players.length; i++){
             G.players[i].currentScore.currentThrow = [...G.players[i].currentScore.hiddenDice, ...G.players[i].currentScore.currentThrow];
             G.players[i].currentScore.hiddenDice = [];
@@ -50,9 +52,6 @@ const endTurn = (G:Game, ctx:any) => {
 
 // Rolls all dice which are not held
 const rollDice = (G:Game, ctx:any) => {
-    // Roll new Dice
-    // FIXME:
-    // Error in 2ter Runde play_penaltiesLeft
     if(G.totalRolls < G.rollsThisTurn-1){
         G.dice = (new Array(G.diceToRoll).fill(0)).map((el:number) => ctx.random.D6());
         G.players[Number(ctx.currentPlayer)].currentScore.hiddenDice = [];
@@ -68,16 +67,38 @@ const rollDice = (G:Game, ctx:any) => {
     }
 }
 
-// If ruleSet allows this you can transform 2x six to 1x one
+const rollDiceDebug = (G:Game, ctx:any, input:number[]) => {
+    if(G.totalRolls < G.rollsThisTurn-1){
+        G.dice = input;
+        G.players[Number(ctx.currentPlayer)].currentScore.hiddenDice = [];
+    }
+    else{
+        G.players[Number(ctx.currentPlayer)].currentScore.hiddenDice = (new Array(G.diceToRoll).fill(0)).map((el:number) => ctx.random.D6());
+        G.dice = [];
+    }
+    G.totalRolls++;
+    // Don't allow more than 3 rolls per turn
+    if(G.totalRolls >= G.rollsThisTurn){
+        endTurn(G, ctx);
+    }
+}
+
+// If ruleSet allows this you can transform 2x six to 1x one AND 3x six to 2x 1
 const transformDice = (G:Game, ctx:any) => {
-    const twoSix:boolean = helper.isTransformationPossible(G.dice, G.ruleSet);
+    const twoSix:number = helper.isTransformationPossible(G.dice, G.ruleSet);
     const ruleSetAllowsTranform = G.ruleSet.twoSixToOne;
     const notLastThrow = G.totalRolls < 3;
-    if(twoSix && ruleSetAllowsTranform && notLastThrow){
+    if((twoSix > 0) && ruleSetAllowsTranform && notLastThrow){
         let diceCopy = [];
-        for(let i = 0, d = 0; i < G.dice.length; i++){
-            if(G.dice[i] !== 6 || d >=2) diceCopy.push(G.dice[i]);
-            else d++;
+        if(evaluation.isGeneral(G.dice, G.diceHold, G.ruleSet)){
+            G.diceHold.push(1);
+            G.diceToRoll -= 1;
+        }
+        else{
+            for(let i = 0, d = 0; i < G.dice.length; i++){
+                if(G.dice[i] !== 6 || d >=2) diceCopy.push(G.dice[i]);
+                else d++;
+            }
         }
         G.dice = diceCopy;
         G.diceHold.push(1);
@@ -108,6 +129,6 @@ const confirmRoundEnd = (G:Game, ctx:any) => {
     }
 }
 
-const moves = {rollDice, holdDice, endTurn, transformDice, confirmRoundEnd};
+const moves = {rollDice, rollDiceDebug, holdDice, endTurn, transformDice, confirmRoundEnd};
 
 export default moves;

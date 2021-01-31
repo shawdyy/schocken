@@ -7,7 +7,7 @@ const createClient = (numPlayers:number=3) => {
         game: createGame(numPlayers, {}),
         numPlayers: numPlayers,
         board: SchockenBoard,
-        debug: false
+        debug: true
     });
 }
 
